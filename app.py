@@ -124,5 +124,26 @@ def update_car(car_id):
         connection.close()
 
 
+@app.route('/cars/<int:car_id>', methods=['DELETE'])
+def delete_car(car_id):
+    connection = get_db_connection()
+    if connection is None:
+        return jsonify({'error': 'Database connection failed'}), 500
+    cursor = connection.cursor()
+    try:
+        delete_query = "DELETE FROM cars WHERE id = %s"
+        cursor.execute(delete_query, (car_id,))
+        connection.commit()
+        if cursor.rowcount == 0:
+            return jsonify({'message': 'Car not found'}), 404
+        return jsonify({'message': 'Car deleted successfully'}), 200
+    except Exception as e:
+        print(f"Error deleting car: {e}")
+        return jsonify({'error': 'Failed to delete car'}), 500
+    finally:
+        cursor.close()
+        connection.close()
+
+
 if __name__ == '__main__':
     app.run(debug=True)
